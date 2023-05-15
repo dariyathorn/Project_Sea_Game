@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -22,6 +23,22 @@ class User extends Authenticatable
         'email',
         'password',
     ];
+    public static function store($request, $id = null){
+        $user = $request->only(
+            'name',
+            'email',
+            'password',
+        );
+        if($id){
+            $user = self::updateOrCreate(['id'=>$id], $user);
+
+        }
+        else{
+            $user = self::create($user);
+            $id = $user->id;
+        }
+        return $user;
+    }
 
     /**
      * The attributes that should be hidden for serialization.
@@ -41,4 +58,18 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+    // public function users():HasMany{
+    //     return $this->hasMany(User::class);
+    // }
+    
+
+    public function ticket():HasOne
+    {
+        return $this->hasOne(Ticket::class);
+    }
+
+    public function teams()
+    {
+        return $this->belongsToMany(Team::class);
+    }
 }
